@@ -1,0 +1,3 @@
+User-agent: *
+Allow: /
+Sitemap: https://oussama-elfila.dev/sitemap.xml
