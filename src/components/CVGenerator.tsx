@@ -433,7 +433,7 @@ export default function CVGenerator({ data, onGenerate }: CVGeneratorProps) {
       <div className="text-center mt-6 print:hidden">
         <button
           onClick={handlePrint}
-          className="bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-6 rounded-lg transition-colors"
+          className="bg-[#0f162b] hover:bg-[#0f162b]/90 text-white font-medium py-2 px-6 rounded-lg transition-colors"
         >
           Print CV
         </button>

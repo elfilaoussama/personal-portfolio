@@ -38,30 +38,22 @@ export default function Navigation({
       ) {
         const key = event.key.toLowerCase();
 
+                // Build next sequence based on previous state
         setKeySequence((prev) => {
-          const newSequence = [...prev, key];
-
-          // Keep only the last 5 keys to match our target sequence length
-          if (newSequence.length > targetSequence.length) {
-            newSequence.shift();
-          }
-
-          // Check if the sequence matches our target
-          if (newSequence.length === targetSequence.length) {
-            const matches = newSequence.every(
-              (k, index) => k === targetSequence[index],
-            );
-            if (matches) {
-              // Trigger admin dashboard and hide the button
-              onOpenAdmin();
-              setShowAdminButton(false);
-              // Reset sequence
-              return [];
-            }
-          }
-
-          return newSequence;
+          const updated = [...prev, key].slice(-targetSequence.length);
+          return updated;
         });
+
+        // Check if the sequence matches our target (use current + key)
+        const prospectiveSeq = [...keySequence, key].slice(-targetSequence.length);
+        const matches = prospectiveSeq.length === targetSequence.length &&
+          prospectiveSeq.every((k, i) => k === targetSequence[i]);
+        if (matches) {
+          onOpenAdmin();
+          setShowAdminButton(false);
+          // reset sequence
+          setKeySequence([]);
+        }
       } else if (!event.ctrlKey) {
         // Reset sequence if Ctrl is not pressed
         setKeySequence([]);

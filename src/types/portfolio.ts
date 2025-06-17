@@ -1,4 +1,5 @@
 export interface PortfolioData {
+  adminHash?: string;
   hero: {
     name: string;
     title: string;

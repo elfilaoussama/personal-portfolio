@@ -1,12 +1,12 @@
-import { useState } from 'react';
-import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
+import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
-import { Mail, Phone, Linkedin } from 'lucide-react';
-import { PortfolioData } from '@/types/portfolio';
+import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
+import { PortfolioData } from '@/types/portfolio';
+import { Linkedin, Mail, Phone } from 'lucide-react';
+import { useState } from 'react';
 
 interface ContactSectionProps {
   contact: PortfolioData['contact'];

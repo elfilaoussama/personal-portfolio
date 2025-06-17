@@ -65,17 +65,17 @@ export default function AdminDashboard({
   const handleAuth = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    const storedHash = storage.getAdminCodeHash();
+      const storedHash = data.adminHash;
     
     if (!storedHash) {
       // First time setup
       const hash = await hashCode(adminCode);
-      storage.setAdminCodeHash(hash);
+      await onUpdateData({ ...data, adminHash: hash });
       setIsAuthenticated(true);
       toast('Admin code set successfully!');
     } else {
       // Verify existing code
-      const isValid = await verifyCode(adminCode, storedHash);
+          const isValid = await verifyCode(adminCode, storedHash);
       if (isValid) {
         setIsAuthenticated(true);
         toast('Access granted!');
@@ -226,10 +226,7 @@ export default function AdminDashboard({
               <Lock className="w-16 h-16 text-slate-400 mx-auto mb-6" />
               <h3 className="text-2xl font-semibold mb-4">Admin Access Required</h3>
               <p className="text-slate-600 mb-6">
-                {storage.getAdminCodeHash() 
-                  ? 'Enter your admin code to access the dashboard'
-                  : 'Set your admin code to secure the dashboard'
-                }
+                {data.adminHash ? 'Enter your admin code to access the dashboard' : 'Set your admin code to secure the dashboard'}
               </p>
               <form onSubmit={handleAuth} className="space-y-4">
                 <Input
@@ -240,7 +237,7 @@ export default function AdminDashboard({
                   required
                 />
                 <Button type="submit" className="w-full">
-                  {storage.getAdminCodeHash() ? 'Access Dashboard' : 'Set Admin Code'}
+                  {data.adminHash ? 'Access Dashboard' : 'Set Admin Code'}
                 </Button>
               </form>
             </div>
@@ -749,8 +746,8 @@ export default function AdminDashboard({
                             onClick={() => {
                               const newCode = prompt('Enter new admin code:');
                               if (newCode) {
-                                hashCode(newCode).then(hash => {
-                                  storage.setAdminCodeHash(hash);
+                                hashCode(newCode).then(async hash => {
+                                  await onUpdateData({ ...data, adminHash: hash });
                                   toast('Admin code updated successfully!');
                                 });
                               }
@@ -786,7 +783,7 @@ export default function AdminDashboard({
               <div className="text-sm text-slate-600">
                 {autoSave ? (
                   hasUnsavedChanges ? (
-                    <span className="text-blue-600 font-medium">🔄 Auto-saving...</span>
+                    <span className="text-[#0f162b] font-medium">🔄 Auto-saving...</span>
                   ) : (
                     <span className="text-green-600">✓ Auto-saved</span>
                   )
