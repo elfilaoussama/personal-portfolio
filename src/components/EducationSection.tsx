@@ -1,6 +1,6 @@
 import { Card, CardContent } from '@/components/ui/card';
-import { Calendar } from 'lucide-react';
 import { PortfolioData } from '@/types/portfolio';
+import { Calendar } from 'lucide-react';
 
 interface EducationSectionProps {
   data: PortfolioData['education'];
@@ -17,18 +17,18 @@ export default function EducationSection({ data }: EducationSectionProps) {
             {data.items.map((edu) => (
               <Card key={edu.id} className="shadow-lg hover:shadow-xl transition-shadow">
                 <CardContent className="p-8">
-                  <div className="flex flex-col md:flex-row md:items-center md:justify-between">
-                    <div>
-                      <h3 className="text-xl font-semibold text-slate-900">{edu.degree}</h3>
+                  <div>
+                    <h3 className="text-xl font-semibold text-slate-900">{edu.degree}</h3>
+                    <div className="flex items-center justify-between w-full">
                       <p className="text-lg text-primary">{edu.school}</p>
-                      {edu.description && (
-                        <p className="text-slate-600 mt-1">{edu.description}</p>
-                      )}
+                      <div className="text-slate-600 flex items-center">
+                        <Calendar className="w-4 h-4 mr-2" />
+                        {edu.duration}
+                      </div>
                     </div>
-                    <div className="text-slate-600 flex items-center mt-2 md:mt-0">
-                      <Calendar className="w-4 h-4 mr-2" />
-                      {edu.duration}
-                    </div>
+                    {edu.description && (
+                      <p className="text-slate-600 mt-1">{edu.description}</p>
+                    )}
                   </div>
                 </CardContent>
               </Card>

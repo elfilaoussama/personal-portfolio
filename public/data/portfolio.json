@@ -1,0 +1,188 @@
+{
+    "hero": {
+      "name": "Oussama EL FILA",
+      "title": "Machine Learning Engineer",
+      "intro": "Machine Learning Engineer focused on deploying scalable software solutions to optimize industrial operations and data-centric applications.",
+      "profileImage": "https://lh3.googleusercontent.com/d/1_obSfIFk_L1vaIw9anu0AfVDkVM4EmYw"
+    },
+    "about": {
+      "bio": "AI/ML specialist focused on practical, impactful solutions that accelerate data processes and support underserved communities. I lead innovative projects that combine technology and social good to create inclusive, real-world applications.\n\n",
+      "interests": [
+        "AI",
+        "Machine Learning",
+        "Web Development",
+        "Cloud Computing",
+        "Open Source",
+        "Social Impact",
+        "Software Engineering"
+      ]
+    },
+    "contact": {
+      "email": "elfilaoussama@gmail.com",
+      "phone": "+212 630-330-357",
+      "location": "Casablance, Morocco",
+      "linkedin": "linkedin.com/in/elfila-oussama"
+    },
+    "skills": {
+      "categories": [
+        {
+          "name": "Coding",
+          "icon": "fas fa-code",
+          "skills": [
+            "Python",
+            "Java",
+            "C++",
+            "JavaScript",
+            "PHP",
+            "SQL",
+            "..."
+          ],
+          "id": "1750107569015"
+        },
+        {
+          "name": "Data Science",
+          "icon": "fas fa-code",
+          "skills": [
+            "PyTorch",
+            "   TensorFlow",
+            "   OpenCV",
+            "  scikit-learn",
+            "   NumPy",
+            "   Pandas",
+            "   Matplotlib",
+            "spaCy",
+            "NLTK",
+            "Transformers",
+            "..."
+          ],
+          "id": "1750107637657"
+        },
+        {
+          "name": "Software Engineering",
+          "icon": "fas fa-code",
+          "skills": [
+            "Object-Oriented Programming",
+            "Data structures",
+            "Design patterns"
+          ],
+          "id": "1750107703997"
+        },
+        {
+          "name": "Web Developpment",
+          "icon": "fas fa-code",
+          "skills": [
+            "ReactJS",
+            "Next.js",
+            "    Flask",
+            "FastApi",
+            "    Git/Github",
+            "    CI/CD",
+            "   REST APIs",
+            "    Docker",
+            "HTML5",
+            "CSS3"
+          ],
+          "id": "1750107724140"
+        },
+        {
+          "name": "Databases",
+          "icon": "fas fa-code",
+          "skills": [
+            "Oracle",
+            "MySQL",
+            "PostgreSQL",
+            "SQLite",
+            "Redis",
+            "Vector Databases"
+          ],
+          "id": "1750107754589"
+        },
+        {
+          "name": "Misc",
+          "icon": "fas fa-code",
+          "skills": [
+            "Academic research",
+            "Leadership",
+            "Communication",
+            "Problem solving",
+            "Initiative"
+          ],
+          "id": "1750107785452"
+        }
+      ]
+    },
+    "experience": {
+      "items": [
+        {
+          "id": "exp1",
+          "title": "Machine Learning Intern",
+          "company": "3D SMART FACTORY • Mohammadia, Morocco",
+          "duration": "Jul 2024 - Dec 2024",
+          "description": "Developed an Advanced Driver Assistance System (ADAS) based on monocular depth estimation, achieving 95% accuracy in object distance prediction. Optimized computation using Cython and GPU acceleration. Deployed the system on Google Cloud Platform using FastAPI and Docker.",
+          "technologies": [
+            "Python",
+            "Cython",
+            "Pytorch",
+            "OpenCV",
+            "FastAPI",
+            "Docker",
+            "GCP",
+            "Websocket"
+          ]
+        }
+      ]
+    },
+    "projects": {
+      "items": [
+        {
+          "id": "proj1",
+          "title": "Document Image Analysis System",
+          "description": "Built a system for document classification, table detection, and handwriting recognition. Used ResNet for document classification with 93% accuracy. Implemented YOLOv11s for table detection, achieving 99.3% mAP@50. Applied a CNN-LSTM model for handwriting recognition with a character error rate of 17.68%.",
+          "technologies": [
+            "PyTorch",
+            "TensorFlow",
+            "Keras",
+            "YOLOv11s",
+            "OpenCV",
+            "Python"
+          ],
+          "liveUrl": "#",
+          "githubUrl": "https://github.com/elfilaoussama/document_image_analysis_system",
+          "imageUrl": "data:image/jpeg;base64,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"
+        },
+        {
+          "id": "proj2",
+          "title": "Email Spam Classiﬁcation Application",
+          "description": "Developed a spam detection system using Naive Bayes, with CountVectorizer for text feature extraction. Achieved 97% accuracy and deployed the model via Hugging Face Spaces.",
+          "technologies": [
+            "Python",
+            "scikit-learn",
+            "NLP",
+            "Naive Bayes",
+            "Hugging Face Spaces"
+          ],
+          "liveUrl": "https://huggingface.co/spaces/OussamaElfila21/Spam_Detector",
+          "githubUrl": "#",
+          "imageUrl": "data:image/png;base64,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"
+        }
+      ]
+    },
+    "education": {
+      "items": [
+        {
+          "id": "edu1",
+          "degree": "M.Sc. Digital Sciences and Artiﬁcial Intelligence",
+          "school": "Mohammed V University",
+          "duration": "2023 - 2025",
+          "description": "The program delivers advanced training in core and applied computer science topics, from theory and machine learning to cybersecurity and blockchain."
+        },
+        {
+          "degree": "B.Sc. Mathematics and Computer Science",
+          "school": "Ibn Zohr University",
+          "duration": "2020 - 2023",
+          "description": "",
+          "id": "1750109768830"
+        }
+      ]
+    }
+  }
