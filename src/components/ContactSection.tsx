@@ -19,20 +19,7 @@ export default function ContactSection({ contact }: ContactSectionProps) {
     subject: '',
     message: ''
   });
-  const [isSubmitting, setIsSubmitting] = useState(false);
   const { toast } = useToast();
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setIsSubmitting(true);
-
-    // Simulate form submission
-    await new Promise(resolve => setTimeout(resolve, 1000));
-    
-    toast('Message sent successfully!');
-    setFormData({ name: '', email: '', subject: '', message: '' });
-    setIsSubmitting(false);
-  };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     setFormData(prev => ({
@@ -74,7 +61,21 @@ export default function ContactSection({ contact }: ContactSectionProps) {
 
             <Card className="shadow-lg">
               <CardContent className="p-8">
-                <form onSubmit={handleSubmit} className="space-y-6">
+                <form 
+  name="contact"
+  method="POST"
+  data-netlify="true"
+  netlify-honeypot="bot-field"
+  className="space-y-6"
+>
+  {/* Netlify form-name hidden input */}
+  <input type="hidden" name="form-name" value="contact" />
+  {/* Honeypot field for bots */}
+  <div style={{ display: 'none' }}>
+    <label>
+      Don’t fill this out if you’re human: <input name="bot-field" />
+    </label>
+  </div>
                   <div>
                     <Label htmlFor="name">Name</Label>
                     <Input
@@ -128,9 +129,8 @@ export default function ContactSection({ contact }: ContactSectionProps) {
                   <Button 
                     type="submit" 
                     className="w-full bg-primary hover:bg-primary/90"
-                    disabled={isSubmitting}
                   >
-                    {isSubmitting ? 'Sending...' : 'Send Message'}
+                    Send Message
                   </Button>
                 </form>
               </CardContent>
