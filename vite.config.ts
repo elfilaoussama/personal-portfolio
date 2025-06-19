@@ -16,5 +16,8 @@ export default defineConfig({
   build: {
     outDir: 'dist',
     emptyOutDir: true
+  },
+  define: {
+    'import.meta.env': JSON.stringify(process.env)
   }
 });

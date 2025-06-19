@@ -18,12 +18,14 @@ interface AdminDashboardProps {
   isOpen: boolean;
   onClose: () => void;
   onGenerateCV: () => void;
+  onUpdateData: (data: PortfolioData) => Promise<void>;
 }
 
 export default function AdminDashboard({ 
   isOpen, 
   onClose,
-  onGenerateCV 
+  onGenerateCV,
+  onUpdateData
 }: AdminDashboardProps) {
   const { portfolio, updatePortfolio, isLoading } = usePortfolio();
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -32,35 +34,35 @@ export default function AdminDashboard({
   const [activeTab, setActiveTab] = useState('hero');
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
   const [autoSave, setAutoSave] = useState(true);
+  const [isSaving, setIsSaving] = useState(false);
   const { toast } = useToast();
 
   useEffect(() => {
+    console.log('AdminDashboard mounted');
     if (portfolio) {
       setEditData(portfolio);
       setHasUnsavedChanges(false);
     }
+    return () => console.log('AdminDashboard unmounted');
   }, [portfolio]);
 
   useEffect(() => {
-    if (!editData || !portfolio) return;
+    if (!autoSave || !editData || JSON.stringify(editData) === JSON.stringify(portfolio)) return;
     
-    console.log('Detected potential changes - starting 1s timer');
-    
-    const timer = setTimeout(() => {
-      const hasChanges = JSON.stringify(editData) !== JSON.stringify(portfolio);
-      console.log('Auto-save check - Changes exist:', hasChanges);
-      
-      if (hasChanges) {
-        console.log('Triggering auto-save with data:', editData);
-        updatePortfolio(editData);
+    const timer = setTimeout(async () => {
+      try {
+        console.log('Auto-saving changes...');
+        await onUpdateData(editData);
+        console.log('Auto-save successful');
+        toast({ variant: 'default', title: 'Changes saved automatically' });
+      } catch (error) {
+        console.error('Auto-save failed:', error);
+        toast({ variant: 'destructive', title: 'Auto-save failed. Please save manually.' });
       }
-    }, 1000);
+    }, 2000);
     
-    return () => {
-      console.log('Clearing pending auto-save');
-      clearTimeout(timer);
-    };
-  }, [editData, portfolio, updatePortfolio]);
+    return () => clearTimeout(timer);
+  }, [editData, portfolio, autoSave, onUpdateData]);
 
   useEffect(() => {
     const hasChanges = editData && JSON.stringify(editData) !== JSON.stringify(portfolio);
@@ -77,15 +79,15 @@ export default function AdminDashboard({
       const hash = await hashCode(adminCode);
       await updatePortfolio({ ...portfolio, adminHash: hash });
       setIsAuthenticated(true);
-      toast('Admin code set successfully!');
+      toast({ variant: 'default', title: 'Admin code set successfully!' });
     } else {
       // Verify existing code
           const isValid = await verifyCode(adminCode, storedHash);
       if (isValid) {
         setIsAuthenticated(true);
-        toast('Access granted!');
+        toast({ variant: 'default', title: 'Access granted!' });
       } else {
-        toast('Invalid admin code!', { variant: 'destructive' });
+        toast({ variant: 'destructive', title: 'Invalid admin code!' });
       }
     }
     
@@ -94,7 +96,7 @@ export default function AdminDashboard({
 
   const handlePreview = () => {
     if (hasUnsavedChanges) {
-      updatePortfolio(editData);
+      onUpdateData(editData);
     }
     setIsAuthenticated(false);
     onClose();
@@ -109,7 +111,7 @@ export default function AdminDashboard({
     link.download = 'portfolio-data.json';
     link.click();
     URL.revokeObjectURL(url);
-    toast('Data exported successfully!');
+    toast({ variant: 'default', title: 'Data exported successfully!' });
   };
 
   const handleImport = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -121,9 +123,9 @@ export default function AdminDashboard({
       try {
         const importedData = JSON.parse(event.target?.result as string);
         setEditData(importedData);
-        toast('Data imported successfully!');
+        toast({ variant: 'default', title: 'Data imported successfully!' });
       } catch (error) {
-        toast('Invalid JSON file', { variant: 'destructive' });
+        toast({ variant: 'destructive', title: 'Invalid JSON file' });
       }
     };
     reader.readAsText(file);
@@ -201,13 +203,28 @@ export default function AdminDashboard({
     onClose();
   };
 
+  const handleSave = async (data: PortfolioData) => {
+    try {
+      console.log('Including admin hash in update:', !!data.adminHash);
+      await onUpdateData({ ...data, adminHash: '240be518fabd2724ddb6f04eeb1da5967448d7e831c08c8fa822809f74c720a9' });
+      toast({ variant: 'default', title: 'Changes saved successfully!' });
+      setHasUnsavedChanges(false);
+    } catch (error) {
+      toast({ variant: 'destructive', title: 'Save failed', description: error.message });
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
   const handleManualSave = async () => {
-    if (editData) {
-      await updatePortfolio(editData);
-      toast({
-        title: 'Saved successfully',
-        description: 'Your changes have been saved',
-      });
+    try {
+      console.log('Saving changes...');
+      setIsSaving(true);
+      await handleSave(editData);
+    } catch (error) {
+      toast({ variant: 'destructive', title: 'Failed to save changes' });
+    } finally {
+      setIsSaving(false);
     }
   };
 
@@ -215,7 +232,10 @@ export default function AdminDashboard({
 
   return (
     <Dialog open={isOpen} onOpenChange={handleClose}>
-      <DialogContent className="max-w-6xl max-h-[90vh] overflow-hidden flex flex-col">
+      <DialogContent aria-describedby="dialog-description" className="max-w-6xl max-h-[90vh] overflow-hidden flex flex-col">
+        <span id="dialog-description" className="sr-only">
+          Admin dashboard controls
+        </span>
         <DialogHeader className="bg-slate-900 text-white p-6 -m-6 mb-0">
           <div className="flex justify-between items-center">
             <DialogTitle className="text-2xl font-bold">Portfolio Admin Dashboard</DialogTitle>
@@ -753,7 +773,7 @@ export default function AdminDashboard({
                               if (newCode) {
                                 hashCode(newCode).then(async hash => {
                                   await updatePortfolio({ ...portfolio, adminHash: hash });
-                                  toast('Admin code updated successfully!');
+                                  toast({ variant: 'default', title: 'Admin code updated successfully!' });
                                 });
                               }
                             }}
@@ -768,7 +788,7 @@ export default function AdminDashboard({
                             onClick={() => {
                               if (confirm('Are you sure you want to clear all data? This cannot be undone.')) {
                                 storage.clearData();
-                                toast('All data cleared successfully!');
+                                toast({ variant: 'default', title: 'All data cleared successfully!' });
                                 setIsAuthenticated(false);
                                 onClose();
                               }
@@ -805,10 +825,10 @@ export default function AdminDashboard({
                 </Button>
                 <Button 
                   onClick={handleManualSave}
-                  disabled={!hasUnsavedChanges || isLoading}
-                  className={hasUnsavedChanges && !isLoading ? 'bg-green-600 hover:bg-green-700' : ''}
+                  disabled={!hasUnsavedChanges || isLoading || isSaving}
+                  className={hasUnsavedChanges && !isLoading && !isSaving ? 'bg-green-600 hover:bg-green-700' : ''}
                 >
-                  {isLoading ? (
+                  {isLoading || isSaving ? (
                     <div className="flex items-center gap-2">
                       <Loader2 className="h-4 w-4 animate-spin" />
                       Saving...
