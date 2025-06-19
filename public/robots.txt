@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://portfolio-75d4b.web.app/sitemap.xml
+Sitemap: https://www.oussama-elfila.dev/sitemap.xml
