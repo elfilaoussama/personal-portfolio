@@ -7,70 +7,75 @@ import { Label } from '@/components/ui/label';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { X, Lock, Download, Upload, FileText, Key, Save, Eye } from 'lucide-react';
+import { X, Lock, Download, Upload, FileText, Key, Save, Eye, Loader2 } from 'lucide-react';
 import { PortfolioData, SkillCategory, Experience, Project, Education } from '@/types/portfolio';
 import { useToast } from '@/hooks/use-toast';
 import { hashCode, verifyCode } from '@/utils/hash';
 import { storage } from '@/utils/storage';
+import { usePortfolio } from '@/hooks/usePortfolio';
 
 interface AdminDashboardProps {
   isOpen: boolean;
   onClose: () => void;
-  data: PortfolioData;
-  onUpdateData: (data: PortfolioData) => void;
   onGenerateCV: () => void;
 }
 
 export default function AdminDashboard({ 
   isOpen, 
-  onClose, 
-  data, 
-  onUpdateData,
+  onClose,
   onGenerateCV 
 }: AdminDashboardProps) {
+  const { portfolio, updatePortfolio, isLoading } = usePortfolio();
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [adminCode, setAdminCode] = useState('');
-  const [editData, setEditData] = useState<PortfolioData>(data);
+  const [editData, setEditData] = useState<PortfolioData | null>(null);
   const [activeTab, setActiveTab] = useState('hero');
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
   const [autoSave, setAutoSave] = useState(true);
   const { toast } = useToast();
 
   useEffect(() => {
-    setEditData(data);
-    setHasUnsavedChanges(false);
-  }, [data]);
-
-  useEffect(() => {
-    const hasChanges = JSON.stringify(editData) !== JSON.stringify(data);
-    setHasUnsavedChanges(hasChanges);
-  }, [editData, data]);
-
-  // Auto-save functionality
-  useEffect(() => {
-    if (autoSave && hasUnsavedChanges) {
-      const timeoutId = setTimeout(async () => {
-        try {
-          await onUpdateData(editData);
-          setHasUnsavedChanges(false);
-        } catch (error) {
-          console.error('Auto-save failed:', error);
-        }
-      }, 2000);
-      
-      return () => clearTimeout(timeoutId);
+    if (portfolio) {
+      setEditData(portfolio);
+      setHasUnsavedChanges(false);
     }
-  }, [editData, autoSave, hasUnsavedChanges, onUpdateData]);
+  }, [portfolio]);
+
+  useEffect(() => {
+    if (!editData || !portfolio) return;
+    
+    console.log('Detected potential changes - starting 1s timer');
+    
+    const timer = setTimeout(() => {
+      const hasChanges = JSON.stringify(editData) !== JSON.stringify(portfolio);
+      console.log('Auto-save check - Changes exist:', hasChanges);
+      
+      if (hasChanges) {
+        console.log('Triggering auto-save with data:', editData);
+        updatePortfolio(editData);
+      }
+    }, 1000);
+    
+    return () => {
+      console.log('Clearing pending auto-save');
+      clearTimeout(timer);
+    };
+  }, [editData, portfolio, updatePortfolio]);
+
+  useEffect(() => {
+    const hasChanges = editData && JSON.stringify(editData) !== JSON.stringify(portfolio);
+    setHasUnsavedChanges(Boolean(hasChanges));
+  }, [editData, portfolio]);
 
   const handleAuth = async (e: React.FormEvent) => {
     e.preventDefault();
     
-      const storedHash = data.adminHash;
+      const storedHash = portfolio?.adminHash;
     
     if (!storedHash) {
       // First time setup
       const hash = await hashCode(adminCode);
-      await onUpdateData({ ...data, adminHash: hash });
+      await updatePortfolio({ ...portfolio, adminHash: hash });
       setIsAuthenticated(true);
       toast('Admin code set successfully!');
     } else {
@@ -87,19 +92,9 @@ export default function AdminDashboard({
     setAdminCode('');
   };
 
-  const handleSave = async () => {
-    try {
-      await onUpdateData(editData);
-      toast('Changes saved successfully!');
-      setHasUnsavedChanges(false);
-    } catch (error) {
-      toast('Failed to save changes', { variant: 'destructive' });
-    }
-  };
-
   const handlePreview = () => {
     if (hasUnsavedChanges) {
-      onUpdateData(editData);
+      updatePortfolio(editData);
     }
     setIsAuthenticated(false);
     onClose();
@@ -206,6 +201,16 @@ export default function AdminDashboard({
     onClose();
   };
 
+  const handleManualSave = async () => {
+    if (editData) {
+      await updatePortfolio(editData);
+      toast({
+        title: 'Saved successfully',
+        description: 'Your changes have been saved',
+      });
+    }
+  };
+
   if (!isOpen) return null;
 
   return (
@@ -226,7 +231,7 @@ export default function AdminDashboard({
               <Lock className="w-16 h-16 text-slate-400 mx-auto mb-6" />
               <h3 className="text-2xl font-semibold mb-4">Admin Access Required</h3>
               <p className="text-slate-600 mb-6">
-                {data.adminHash ? 'Enter your admin code to access the dashboard' : 'Set your admin code to secure the dashboard'}
+                {portfolio?.adminHash ? 'Enter your admin code to access the dashboard' : 'Set your admin code to secure the dashboard'}
               </p>
               <form onSubmit={handleAuth} className="space-y-4">
                 <Input
@@ -237,7 +242,7 @@ export default function AdminDashboard({
                   required
                 />
                 <Button type="submit" className="w-full">
-                  {data.adminHash ? 'Access Dashboard' : 'Set Admin Code'}
+                  {portfolio?.adminHash ? 'Access Dashboard' : 'Set Admin Code'}
                 </Button>
               </form>
             </div>
@@ -266,7 +271,7 @@ export default function AdminDashboard({
                         <Label htmlFor="name">Full Name</Label>
                         <Input
                           id="name"
-                          value={editData.hero.name}
+                          value={editData?.hero.name}
                           onChange={(e) => handleFieldChange('hero', 'name', e.target.value)}
                         />
                       </div>
@@ -274,7 +279,7 @@ export default function AdminDashboard({
                         <Label htmlFor="title">Job Title</Label>
                         <Input
                           id="title"
-                          value={editData.hero.title}
+                          value={editData?.hero.title}
                           onChange={(e) => handleFieldChange('hero', 'title', e.target.value)}
                         />
                       </div>
@@ -282,7 +287,7 @@ export default function AdminDashboard({
                         <Label htmlFor="intro">Introduction</Label>
                         <Textarea
                           id="intro"
-                          value={editData.hero.intro}
+                          value={editData?.hero.intro}
                           onChange={(e) => handleFieldChange('hero', 'intro', e.target.value)}
                           rows={4}
                         />
@@ -291,7 +296,7 @@ export default function AdminDashboard({
                         <Label htmlFor="profileImage">Profile Image URL</Label>
                         <Input
                           id="profileImage"
-                          value={editData.hero.profileImage || ''}
+                          value={editData?.hero.profileImage || ''}
                           onChange={(e) => handleFieldChange('hero', 'profileImage', e.target.value)}
                           placeholder="https://example.com/image.jpg"
                         />
@@ -311,7 +316,7 @@ export default function AdminDashboard({
                         <Label htmlFor="bio">Biography</Label>
                         <Textarea
                           id="bio"
-                          value={editData.about.bio}
+                          value={editData?.about.bio}
                           onChange={(e) => handleFieldChange('about', 'bio', e.target.value)}
                           rows={6}
                         />
@@ -320,7 +325,7 @@ export default function AdminDashboard({
                         <Label htmlFor="interests">Interests (comma-separated)</Label>
                         <Input
                           id="interests"
-                          value={editData.about.interests.join(', ')}
+                          value={editData?.about.interests.join(', ')}
                           onChange={(e) => handleFieldChange('about', 'interests', e.target.value.split(', ').filter(Boolean))}
                         />
                       </div>
@@ -337,7 +342,7 @@ export default function AdminDashboard({
                         <Input
                           id="email"
                           type="email"
-                          value={editData.contact.email}
+                          value={editData?.contact.email}
                           onChange={(e) => handleFieldChange('contact', 'email', e.target.value)}
                         />
                       </div>
@@ -345,7 +350,7 @@ export default function AdminDashboard({
                         <Label htmlFor="phone">Phone</Label>
                         <Input
                           id="phone"
-                          value={editData.contact.phone}
+                          value={editData?.contact.phone}
                           onChange={(e) => handleFieldChange('contact', 'phone', e.target.value)}
                         />
                       </div>
@@ -353,7 +358,7 @@ export default function AdminDashboard({
                         <Label htmlFor="location">Location</Label>
                         <Input
                           id="location"
-                          value={editData.contact.location}
+                          value={editData?.contact.location}
                           onChange={(e) => handleFieldChange('contact', 'location', e.target.value)}
                         />
                       </div>
@@ -361,7 +366,7 @@ export default function AdminDashboard({
                         <Label htmlFor="linkedin">LinkedIn</Label>
                         <Input
                           id="linkedin"
-                          value={editData.contact.linkedin}
+                          value={editData?.contact.linkedin}
                           onChange={(e) => handleFieldChange('contact', 'linkedin', e.target.value)}
                         />
                       </div>
@@ -375,7 +380,7 @@ export default function AdminDashboard({
                       <CardTitle>Skills Management</CardTitle>
                     </CardHeader>
                     <CardContent className="space-y-6">
-                      {editData.skills.categories.map((category, index) => (
+                      {editData?.skills.categories.map((category, index) => (
                         <Card key={category.id}>
                           <CardContent className="p-4">
                             <div className="space-y-4">
@@ -456,7 +461,7 @@ export default function AdminDashboard({
                       <CardTitle>Experience Management</CardTitle>
                     </CardHeader>
                     <CardContent className="space-y-6">
-                      {editData.experience.items.map((job, index) => (
+                      {editData?.experience.items.map((job, index) => (
                         <Card key={job.id}>
                           <CardContent className="p-4">
                             <div className="space-y-4">
@@ -533,7 +538,7 @@ export default function AdminDashboard({
                       <CardTitle>Projects Management</CardTitle>
                     </CardHeader>
                     <CardContent className="space-y-6">
-                      {editData.projects.items.map((project, index) => (
+                      {editData?.projects.items.map((project, index) => (
                         <Card key={project.id}>
                           <CardContent className="p-4">
                             <div className="space-y-4">
@@ -618,7 +623,7 @@ export default function AdminDashboard({
                       <CardTitle>Education Management</CardTitle>
                     </CardHeader>
                     <CardContent className="space-y-6">
-                      {editData.education.items.map((edu, index) => (
+                      {editData?.education.items.map((edu, index) => (
                         <Card key={edu.id}>
                           <CardContent className="p-4">
                             <div className="space-y-4">
@@ -747,7 +752,7 @@ export default function AdminDashboard({
                               const newCode = prompt('Enter new admin code:');
                               if (newCode) {
                                 hashCode(newCode).then(async hash => {
-                                  await onUpdateData({ ...data, adminHash: hash });
+                                  await updatePortfolio({ ...portfolio, adminHash: hash });
                                   toast('Admin code updated successfully!');
                                 });
                               }
@@ -799,12 +804,18 @@ export default function AdminDashboard({
                   Apply & Preview
                 </Button>
                 <Button 
-                  onClick={handleSave}
-                  disabled={!hasUnsavedChanges || autoSave}
-                  className={hasUnsavedChanges && !autoSave ? 'bg-green-600 hover:bg-green-700' : ''}
+                  onClick={handleManualSave}
+                  disabled={!hasUnsavedChanges || isLoading}
+                  className={hasUnsavedChanges && !isLoading ? 'bg-green-600 hover:bg-green-700' : ''}
                 >
-                  <Save className="w-4 h-4 mr-2" />
-                  {autoSave ? 'Auto-Save ON' : 'Save Changes'}
+                  {isLoading ? (
+                    <div className="flex items-center gap-2">
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                      Saving...
+                    </div>
+                  ) : (
+                    'Save Changes'
+                  )}
                 </Button>
               </div>
             </div>

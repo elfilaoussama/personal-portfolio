@@ -9,12 +9,12 @@ import EducationSection from '@/components/EducationSection';
 import ContactSection from '@/components/ContactSection';
 import BackToTop from '@/components/BackToTop';
 import AdminDashboard from '@/components/AdminDashboard';
-import { usePortfolioData } from '@/hooks/usePortfolioData';
+import { usePortfolio } from '@/hooks/usePortfolio';
 import { useToast } from '@/hooks/use-toast';
 import { useReactToPrint } from 'react-to-print';
 
 export default function Home() {
-  const { data, updateData } = usePortfolioData();
+  const { portfolio, isLoading, updatePortfolio } = usePortfolio();
   const [isAdminOpen, setIsAdminOpen] = useState(false);
   const { toast } = useToast();
 
@@ -22,7 +22,7 @@ export default function Home() {
 
   const handlePrint = useReactToPrint({
     contentRef: componentRef,
-    documentTitle: `${data.hero.name}_CV`,
+    documentTitle: portfolio ? `${portfolio.hero.name}_CV` : 'My_CV',
   });
 
   const handleDownloadCV = () => {
@@ -37,12 +37,12 @@ export default function Home() {
   const CVTemplate = () => (
     <div className="bg-white p-8 max-w-4xl mx-auto text-sm leading-relaxed">
       <header className="text-center mb-8 border-b border-gray-300 pb-6">
-        <h1 className="text-3xl font-bold text-gray-900 mb-2">{data.hero.name}</h1>
-        <h2 className="text-xl text-gray-600 mb-4">{data.hero.title}</h2>
+        <h1 className="text-3xl font-bold text-gray-900 mb-2">{portfolio.hero.name}</h1>
+        <h2 className="text-xl text-gray-600 mb-4">{portfolio.hero.title}</h2>
         <div className="flex justify-center space-x-6 text-sm text-gray-600">
-          <span>{data.contact.email}</span>
-          <span>{data.contact.phone}</span>
-          <span>{data.contact.location}</span>
+          <span>{portfolio.contact.email}</span>
+          <span>{portfolio.contact.phone}</span>
+          <span>{portfolio.contact.location}</span>
         </div>
       </header>
 
@@ -50,14 +50,14 @@ export default function Home() {
         <h3 className="text-lg font-bold text-gray-900 mb-3 border-b border-gray-200 pb-1">
           Professional Summary
         </h3>
-        <p className="text-gray-700">{data.about.bio}</p>
+        <p className="text-gray-700">{portfolio.about.bio}</p>
       </section>
 
       <section className="mb-6">
         <h3 className="text-lg font-bold text-gray-900 mb-3 border-b border-gray-200 pb-1">
           Professional Experience
         </h3>
-        {data.experience.items.map((job) => (
+        {portfolio.experience.items.map((job) => (
           <div key={job.id} className="mb-4">
             <div className="flex justify-between items-start mb-1">
               <div>
@@ -78,7 +78,7 @@ export default function Home() {
         <h3 className="text-lg font-bold text-gray-900 mb-3 border-b border-gray-200 pb-1">
           Education
         </h3>
-        {data.education.items.map((edu) => (
+        {portfolio.education.items.map((edu) => (
           <div key={edu.id} className="mb-3">
             <div className="flex justify-between items-start">
               <div>
@@ -96,7 +96,7 @@ export default function Home() {
         <h3 className="text-lg font-bold text-gray-900 mb-3 border-b border-gray-200 pb-1">
           Technical Skills
         </h3>
-        {data.skills.categories.map((category) => (
+        {portfolio.skills.categories.map((category) => (
           <div key={category.id} className="mb-2">
             <span className="font-semibold text-gray-900">{category.name}:</span>
             <span className="text-gray-700 ml-2">{category.skills.join(', ')}</span>
@@ -108,7 +108,7 @@ export default function Home() {
         <h3 className="text-lg font-bold text-gray-900 mb-3 border-b border-gray-200 pb-1">
           Notable Projects
         </h3>
-        {data.projects.items.slice(0, 3).map((project) => (
+        {portfolio.projects.items.slice(0, 3).map((project) => (
           <div key={project.id} className="mb-3">
             <h4 className="font-semibold text-gray-900">{project.title}</h4>
             <p className="text-gray-700 text-sm mb-1">{project.description}</p>
@@ -121,22 +121,25 @@ export default function Home() {
     </div>
   );
 
+  if (isLoading) return <div>Loading...</div>;
+  if (!portfolio) return <div>No portfolio data found</div>;
+
   return (
     <div className="min-h-screen bg-slate-50">
       <Navigation
-        portfolioName={data.hero.name}
+        portfolioName={portfolio.hero.name}
         onDownloadCV={handleDownloadCV}
         onOpenAdmin={() => setIsAdminOpen(true)}
       />
 
       <main>
-        <HeroSection data={data.hero} />
-        <AboutSection about={data.about} contact={data.contact} />
-        <SkillsSection data={data.skills} />
-        <ExperienceSection data={data.experience} />
-        <ProjectsSection data={data.projects} />
-        <EducationSection data={data.education} />
-        <ContactSection contact={data.contact} />
+        <HeroSection data={portfolio.hero} />
+        <AboutSection about={portfolio.about} contact={portfolio.contact} />
+        <SkillsSection data={portfolio.skills} />
+        <ExperienceSection data={portfolio.experience} />
+        <ProjectsSection data={portfolio.projects} />
+        <EducationSection data={portfolio.education} />
+        <ContactSection contact={portfolio.contact} />
       </main>
 
       <BackToTop />
@@ -144,8 +147,8 @@ export default function Home() {
       <AdminDashboard
         isOpen={isAdminOpen}
         onClose={() => setIsAdminOpen(false)}
-        data={data}
-        onUpdateData={updateData}
+        data={portfolio}
+        onUpdateData={updatePortfolio}
         onGenerateCV={handleGenerateCV}
       />
 
