@@ -49,8 +49,8 @@ export default function AboutSection({ about, contact }: AboutSectionProps) {
                     <span>{contact.location}</span>
                   </div>
                   <div className="flex items-center">
-                    <Linkedin className="text-primary w-5 h-5 mr-3" />
-                    <a href={`https://${contact.linkedin}`} className="text-primary hover:underline">
+                    <Linkedin className="text-[#2094F3] w-5 h-5 mr-3" />
+                    <a href={`https://${contact.linkedin}`} className="text-[#2094F3] hover:underline">
                       {contact.linkedin}
                     </a>
                   </div>
